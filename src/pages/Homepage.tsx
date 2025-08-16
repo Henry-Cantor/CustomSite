@@ -1,7 +1,18 @@
 import React, { useState } from "react";
-import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+  increment,
+  Timestamp,
+} from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { chargeUser } from "../firebase/payments";
 
@@ -17,243 +28,431 @@ export default function Homepage() {
     waiverCode: "",
     email: "",
     password: "",
-    renew: false,
+    advertiserName: "", // NEW optional field
   });
 
-  const validWaiverCodes = ["WAIVER2025"];
-  const isWaiverValid = () => validWaiverCodes.includes(formData.waiverCode);
+  React.useEffect(() => {
+  const data = sessionStorage.getItem("pendingRegistration");
+  if (data) setFormData(JSON.parse(data));
+}, []);
+
+// Save session before payment or login
+const saveSessionData = () => {
+  sessionStorage.setItem("pendingRegistration", JSON.stringify(formData));
+};
+
+const downloadFile = (url: string, filename: string) => {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename; // forces download
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+
+  const validWaiverCodes = ["ax791kcl$20"];
+  const isWaiverValid = () => validWaiverCodes.includes(formData.waiverCode.trim());
+
+  const oneYearFromNow = () => Timestamp.fromDate(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000));
+
+  // Increment advertiser counter (meta/advertisers doc, field per lowercase name)
+  const bumpAdvertiser = async (rawName: string) => {
+    const key = rawName.trim().toLowerCase();
+    if (!key) return;
+    const ref = doc(db, "meta", "advertisers");
+    // increment creates the field if missing
+    await setDoc(ref, { [key]: increment(1) } as any, { merge: true });
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    saveSessionData();
     setStep("paying");
     setError("");
 
     try {
-      // Determine charge amount
       let chargeAmount = 20;
+      console.log(formData.userType)
+      console.log(formData.waiverCode.trim())
       if ((formData.userType === "teacher" || formData.userType === "student") && isWaiverValid()) {
         chargeAmount = 10;
       }
 
-      const paymentSuccess = await chargeUser(chargeAmount, {});
-
+      const paymentSuccess = await chargeUser(chargeAmount, {email: formData.email.trim()});
       if (!paymentSuccess) {
         setError("Payment failed. Please try again.");
         setStep("error");
         return;
       }
 
-      // Create account in Firebase Auth
       const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email.trim(),
+        formData.password
+      );
       const user = userCredential.user;
 
       await updateProfile(user, { displayName: formData.name || formData.userType });
 
-      // Save user info in Firestore
-      const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year
       await setDoc(doc(db, "users", user.uid), {
         student: formData.userType === "student",
         teacher: formData.userType === "teacher",
         classCode: formData.classCode || null,
         name: formData.name || null,
         createdAt: serverTimestamp(),
-        expiresAt,
+        expiresAt: oneYearFromNow(),
       });
 
-      // Trigger download
-      window.open("/path-to-app-download/CustoMLearning.zip", "_blank");
+      // Advertiser credit (optional)
+      if (formData.advertiserName) {
+        await bumpAdvertiser(formData.advertiserName);
+      }
 
+      // Trigger download (replace with your real file)
+      downloadFile("/downloads/CustoMLearning.zip", "CustoMLearning.zip");
+      sessionStorage.removeItem("pendingRegistration"); 
       setStep("done");
     } catch (err: any) {
-      setError("Error: " + err.message);
+      setError("Error: " + (err?.message || String(err)));
       setStep("error");
     }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    saveSessionData();
     setStep("loginPay");
     setError("");
 
     try {
       const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email.trim(),
+        formData.password
+      );
       const user = userCredential.user;
 
       const userRef = doc(db, "users", user.uid);
       const snap = await getDoc(userRef);
-      if (!snap.exists()) {
-        setError("User record not found in database.");
-        setStep("error");
-        return;
+      if (!snap.exists()) throw new Error("User record not found.");
+
+      const data = snap.data() || {};
+
+      // Check expiry
+      const now = Timestamp.now();
+      let needsPayment = true;
+      if (data.expiresAt && data.expiresAt.toMillis() > now.toMillis()) {
+        // Account still active, optionally ask if user wants to renew
+        needsPayment = true; // or false if auto-free renewal
       }
 
-      // Charge user for renewal if needed
-      let chargeAmount = 20;
-      if ((snap.data().student || snap.data().teacher) && isWaiverValid()) chargeAmount = 10;
+      if (needsPayment) {
+        // Determine charge amount
+        let chargeAmount = 20;
+        if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 10;
 
-      const paymentSuccess = await chargeUser(chargeAmount, {});
-      if (!paymentSuccess) {
-        setError("Payment failed. Please try again.");
-        setStep("error");
-        return;
+        const paymentSuccess = await chargeUser(chargeAmount, {email: formData.email.trim()});
+        if (!paymentSuccess) throw new Error("Payment failed.");
       }
 
-      // Update expiresAt to 1 year from now
-      const newExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-      await setDoc(userRef, { expiresAt: newExpiresAt }, { merge: true });
+      // Update expiry
+      await setDoc(userRef, { expiresAt: oneYearFromNow() }, { merge: true });
+
+      // Optional advertiser increment
+      if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
 
       // Trigger download
-      window.open("/path-to-app-download/CustoMLearning.zip", "_blank");
-
+      downloadFile("/downloads/CustoMLearning.zip", "CustoMLearning.zip");
+      sessionStorage.removeItem("pendingRegistration");
       setStep("done");
     } catch (err: any) {
-      setError("Login failed: " + err.message);
+      setError("Login failed: " + (err?.message || String(err)));
       setStep("error");
     }
   };
 
+
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
-      <h1 className="text-4xl font-bold text-purple-700 mb-4">Welcome to CustoMLearning</h1>
-      <p>
-        Learn machine learning with interactive lessons and datasets. Fill out the form below to register or renew your account.
-      </p>
+    <div className="max-w-7xl mx-auto w-full px-6 py-10 space-y-12">
+      {/* Hero / Intro */}
+      <section className="bg-white rounded-2xl shadow p-8 md:p-10">
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900">
+          Welcome to <span className="text-indigo-600">CustoMLearning</span>!!
+        </h1>
+        <p className="mt-4 text-lg text-gray-600 max-w-3xl">
+          Explore and master machine learning with interactive lessons, hands-on datasets, and do-it-yourself activities, all without advanced coding knowledge.
+          Register below or continue your existing account to renew access for another year!
+        </p>
 
-      {step === "form" && (
-        <form onSubmit={handleRegister} className="space-y-4 p-6 bg-purple-50 rounded shadow">
-          <div>
-            <label className="block font-semibold mb-1">I am a:</label>
-            <select
-              value={formData.userType}
-              onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
-              required
-              className="border p-2 w-full"
-            >
-              <option value="individual">Individual</option>
-              <option value="teacher">Teacher</option>
-              <option value="student">Student</option>
-            </select>
+        {/* Registration / Login Cards */}
+        <div className="mt-8 grid md:grid-cols-2 gap-6">
+          {/* Register */}
+          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-indigo-900">New here? Register & Pay</h2>
+            <p className="text-sm text-indigo-800 mt-1">
+              Create an account and get 1 year of access.
+            </p>
+
+            {step === "form" && (
+              <form onSubmit={handleRegister} className="mt-4 space-y-4">
+                <div>
+                  <label className="block font-medium mb-1">I am a</label>
+                  <select
+                    value={formData.userType}
+                    onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
+                    required
+                    className="border rounded-lg p-2 w-full"
+                  >
+                    <option value="individual">Individual</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                  </select>
+                </div>
+
+                {(formData.userType === "teacher" || formData.userType === "student") && (
+                  <div>
+                    <label className="block font-medium mb-1">Class Code</label>
+                    <input
+                      type="text"
+                      value={formData.classCode}
+                      onChange={(e) => setFormData({ ...formData, classCode: e.target.value })}
+                      className="border rounded-lg p-2 w-full"
+                      placeholder="Enter your class code"
+                    />
+                  </div>
+                )}
+
+                {formData.userType === "student" && (
+                  <div>
+                    <label className="block font-medium mb-1">Name</label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="border rounded-lg p-2 w-full"
+                      placeholder="Your name"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block font-medium mb-1">Email (username)</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="border rounded-lg p-2 w-full"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium mb-1">Password</label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="border rounded-lg p-2 w-full"
+                    placeholder="Choose a password"
+                    required
+                  />
+                </div>
+
+                {(formData.userType === "teacher" || formData.userType === "student") && (
+                  <div>
+                    <label className="block font-medium mb-1">Waiver Code (optional)</label>
+                    <input
+                      type="text"
+                      value={formData.waiverCode}
+                      onChange={(e) => setFormData({ ...formData, waiverCode: e.target.value })}
+                      className="border rounded-lg p-2 w-full"
+                      placeholder="WAIVER2025"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block font-medium mb-1">
+                    If you heard about CustoMLearning from one of our salespeople, what is their first name, no spaces/capitals? (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.advertiserName}
+                    onChange={(e) => setFormData({ ...formData, advertiserName: e.target.value })}
+                    className="border rounded-lg p-2 w-full"
+                    placeholder="e.g. alex"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg w-full"
+                  >
+                    Register & Pay
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {step === "paying" && (
+              <p className="mt-4 text-indigo-900 font-medium">Processing payment...</p>
+            )}
           </div>
 
-          {(formData.userType === "teacher" || formData.userType === "student") && (
-            <div>
-              <label className="block font-semibold mb-1">Class Code</label>
-              <input
-                type="text"
-                value={formData.classCode}
-                onChange={(e) => setFormData({ ...formData, classCode: e.target.value })}
-                className="border p-2 w-full"
-                placeholder="Enter your class code"
-              />
-            </div>
-          )}
+          {/* Login / Renew */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900">Continue Existing Account</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Log in to renew your access for another year.
+            </p>
 
-          {formData.userType === "student" && (
-            <div>
-              <label className="block font-semibold mb-1">Name</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="border p-2 w-full"
-                placeholder="Your name"
-              />
-            </div>
-          )}
+            {step === "loginForm" && (
+              <form onSubmit={handleLogin} className="mt-4 space-y-4">
+                <div>
+                  <label className="block font-medium mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="border rounded-lg p-2 w-full"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
 
-          <div>
-            <label className="block font-semibold mb-1">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="border p-2 w-full"
-              placeholder="Email for account"
-              required
+                <div>
+                  <label className="block font-medium mb-1">Password</label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="border rounded-lg p-2 w-full"
+                    placeholder="Your password"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium mb-1">
+                    If a salesperson referred you, their first name (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.advertiserName}
+                    onChange={(e) => setFormData({ ...formData, advertiserName: e.target.value })}
+                    className="border rounded-lg p-2 w-full"
+                    placeholder="e.g. alex"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center bg-gray-900 hover:bg-black text-white font-semibold px-4 py-2 rounded-lg w-full"
+                  >
+                    Login & Renew
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {step === "loginPay" && (
+              <p className="mt-4 text-gray-900 font-medium">Logging in and processing payment...</p>
+            )}
+
+            {step === "form" && (
+              <button
+                onClick={() => setStep("loginForm")}
+                className="mt-4 inline-flex items-center justify-center border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold px-4 py-2 rounded-lg w-full"
+              >
+                Continue Existing Account
+              </button>
+            )}
+
+            {step === "loginForm" && (
+              <button
+                onClick={() => setStep("form")}
+                className="mt-3 inline-flex items-center justify-center text-indigo-700 hover:text-indigo-900 font-semibold px-4 py-2 rounded-lg w-full"
+              >
+                Back to Registration
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Status */}
+        {step === "done" && (
+          <p className="mt-6 text-green-700 font-semibold">
+            Thank you! Your download should begin shortly.
+          </p>
+        )}
+        {step === "error" && (
+          <p className="mt-6 text-red-600 font-semibold">{error}</p>
+        )}
+      </section>
+
+      {/* Promo Rows */}
+      <section className="space-y-10">
+        {/* Row 1: image left */}
+        <div className="grid md:grid-cols-12 gap-6 items-center">
+          <div className="md:col-span-5">
+            <img
+              src="/ads/row1.png"
+              alt="Learn visually"
+              className="w-full h-64 object-cover rounded-xl shadow"
             />
           </div>
+          <div className="md:col-span-7">
+            <h3 className="text-2xl font-bold text-gray-900">Learn by Doing</h3>
+            <p className="mt-2 text-gray-600">
+              CustoMLearning features an interactive Create page where you can create real ML networks from scratch.
+              Customize different features, pick your own model types and structure, and make AI to evaluate CSV files and image folders!
+              Models and evaluation graphs are saved to your device, and all of your projects are tracked for your convenience.
+            </p>
+          </div>
+        </div>
 
-          <div>
-            <label className="block font-semibold mb-1">Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="border p-2 w-full"
-              placeholder="Choose a password"
-              required
+        {/* Row 2: image right */}
+        <div className="grid md:grid-cols-12 gap-6 items-center">
+          <div className="md:col-span-7 order-2 md:order-1">
+            <h3 className="text-2xl font-bold text-gray-900">Real-World Data and Testing</h3>
+            <p className="mt-2 text-gray-600">
+              Work with our datasets to see how what you learn impacts the real world, or find your own data to conduct research on.
+              An interactive Testing module allows for you to make real-time inferences simply by uploading your model and choice of data.
+            </p>
+          </div>
+          <div className="md:col-span-5 order-1 md:order-2">
+            <img
+              src="/ads/row2.png"
+              alt="Real datasets"
+              className="w-full h-64 object-cover rounded-xl shadow"
             />
           </div>
+        </div>
 
-          {(formData.userType === "teacher" || formData.userType === "student") && (
-            <div>
-              <label className="block font-semibold mb-1">Waiver Code (optional)</label>
-              <input
-                type="text"
-                value={formData.waiverCode}
-                onChange={(e) => setFormData({ ...formData, waiverCode: e.target.value })}
-                className="border p-2 w-full"
-                placeholder="Enter waiver code"
-              />
-            </div>
-          )}
-
-          <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-            Register & Pay
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setStep("loginForm")}
-            className="ml-4 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
-          >
-            Continue Existing Account
-          </button>
-        </form>
-      )}
-
-      {step === "loginForm" && (
-        <form onSubmit={handleLogin} className="space-y-4 p-6 bg-purple-50 rounded shadow">
-          <div>
-            <label className="block font-semibold mb-1">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="border p-2 w-full"
-              placeholder="Email"
-              required
+        {/* Row 3: image left */}
+        <div className="grid md:grid-cols-12 gap-6 items-center">
+          <div className="md:col-span-5">
+            <img
+              src="/ads/row3.png"
+              alt="Progress tracking"
+              className="w-full h-64 object-cover rounded-xl shadow"
             />
           </div>
-
-          <div>
-            <label className="block font-semibold mb-1">Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="border p-2 w-full"
-              placeholder="Password"
-              required
-            />
+          <div className="md:col-span-7">
+            <h3 className="text-2xl font-bold text-gray-900">Explore Our Curriculum and Track Your Progress</h3>
+            <p className="mt-2 text-gray-600">
+              Establish an in-depth understanding of AI through our curriculum that will serve you years in the future. See module scores, retakes, and milestones at a glance.
+              Pick up right where you left off—on any device that has CustoMLearning downloaded.
+            </p>
           </div>
-
-          <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-            Login & Renew
-          </button>
-
-          <button type="button" onClick={() => setStep("form")} className="ml-4 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
-            Back to Registration
-          </button>
-        </form>
-      )}
-
-      {step === "paying" && <p className="text-purple-700 font-semibold">Processing payment...</p>}
-      {step === "loginPay" && <p className="text-purple-700 font-semibold">Logging in and processing payment...</p>}
-      {step === "done" && <p className="text-green-600 font-semibold">Thank you! Download should begin shortly.</p>}
-      {step === "error" && <p className="text-red-600 font-semibold">{error}</p>}
+        </div>
+      </section>
     </div>
   );
 }

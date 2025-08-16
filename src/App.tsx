@@ -30,53 +30,65 @@ function MLIcon() {
 export default function App() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <nav className="sticky top-0 z-50 shadow bg-gray-900 text-white px-6 py-4 flex items-center">
-        <NavLink
-          to="/"
-          aria-label="Go to Homepage"
-          className="flex items-center mr-auto space-x-2 px-3 py-1 rounded"
-        >
-          <MLIcon />
-          <span className="text-indigo-400 font-bold text-xl select-none">
-            CustoMLearning
-          </span>
-        </NavLink>
-
-        <div className="flex space-x-12">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 shadow bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo + title */}
           <NavLink
             to="/"
-            className={({ isActive }) =>
-              `font-semibold text-lg ${
-                isActive ? "text-indigo-400 border-b-2 border-indigo-400" : "hover:text-indigo-400"
-              }`
-            }
+            aria-label="Go to Homepage"
+            className="flex items-center space-x-2"
           >
-            Home
+            <MLIcon />
+            <span className="text-indigo-400 font-bold text-xl select-none">
+              CustoMLearning
+            </span>
           </NavLink>
-          <NavLink
-            to="/datasets"
-            className={({ isActive }) =>
-              `font-semibold text-lg ${
-                isActive ? "text-indigo-400 border-b-2 border-indigo-400" : "hover:text-indigo-400"
-              }`
-            }
-          >
-            Datasets
-          </NavLink>
-          <NavLink
-            to="/privacy"
-            className={({ isActive }) =>
-              `font-semibold text-lg ${
-                isActive ? "text-indigo-400 border-b-2 border-indigo-400" : "hover:text-indigo-400"
-              }`
-            }
-          >
-            Privacy
-          </NavLink>
+
+          {/* Links */}
+          <div className="flex space-x-8">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `font-semibold text-lg transition-colors ${
+                  isActive
+                    ? "text-indigo-400 border-b-2 border-indigo-400"
+                    : "hover:text-indigo-400"
+                }`
+              }
+            >
+              Home
+            </NavLink>
+            <NavLink
+              to="/datasets"
+              className={({ isActive }) =>
+                `font-semibold text-lg transition-colors ${
+                  isActive
+                    ? "text-indigo-400 border-b-2 border-indigo-400"
+                    : "hover:text-indigo-400"
+                }`
+              }
+            >
+              Datasets
+            </NavLink>
+            <NavLink
+              to="/privacy"
+              className={({ isActive }) =>
+                `font-semibold text-lg transition-colors ${
+                  isActive
+                    ? "text-indigo-400 border-b-2 border-indigo-400"
+                    : "hover:text-indigo-400"
+                }`
+              }
+            >
+              Privacy
+            </NavLink>
+          </div>
         </div>
       </nav>
 
-      <main className="flex-1 p-8 overflow-auto">
+      {/* Main Content */}
+      <main className="flex-1 p-8 overflow-auto max-w-7xl mx-auto w-full">
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/datasets" element={<Datasets />} />
