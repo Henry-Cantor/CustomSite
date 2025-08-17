@@ -182,16 +182,24 @@ const downloadFile = (url: string, filename: string) => {
 
   return (
     <div className="max-w-7xl mx-auto w-full px-6 py-10 space-y-12">
-      {/* Hero / Intro */}
-      <section className="bg-white rounded-2xl shadow p-8 md:p-10">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900">
-          Welcome to <span className="text-indigo-600">CustoMLearning</span>!!
-        </h1>
-        <p className="mt-4 text-lg text-gray-600 max-w-3xl">
-          Explore and master machine learning with interactive lessons, hands-on datasets, and do-it-yourself activities, all without advanced coding knowledge.
-          Register below or continue your existing account to renew access! Subscription is just $20/year, or less with a promo code.
-        </p>
+    <section className="bg-white rounded-2xl shadow p-8 md:p-10">
+      <div className="relative bg-gradient-to-r from-indigo-900 via-gray-900 to-indigo-900 rounded-2xl">
+  <div className="mx-auto max-w-7xl px-6 py-16 text-center sm:py-24 lg:py-32">
+    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+      Welcome to <span className="text-indigo-400">CustoMLearning</span>!!
+    </h1>
+    <p className="mt-6 text-lg text-gray-200 max-w-3xl mx-auto">
+      Explore and master machine learning with interactive lessons, hands-on datasets, and do-it-yourself activities — all without advanced coding knowledge.
+      <br />
+      Register below or continue your existing account to renew access! Subscription is just{" "}
+      <span className="font-semibold text-white">$20/year</span>, or less with a promo code.
+    </p>
+    
+  </div>
+</div>
 
+
+      {/* Hero / Intro */}
         {/* Registration / Login Cards */}
         <div className="mt-8 grid md:grid-cols-2 gap-6">
           {/* Register */}
@@ -431,14 +439,14 @@ const downloadFile = (url: string, filename: string) => {
       <section className="space-y-10">
         {/* Row 1: image left */}
         <div className="grid md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-5">
+          <div className="md:col-span-7">
             <img
-              src="/ads/row1.png"
+              src="/ads/create2.png"
               alt="Learn visually"
-              className="w-full h-64 object-cover rounded-xl shadow"
+              className="w-full h-200 object-cover rounded-xl shadow"
             />
           </div>
-          <div className="md:col-span-7">
+          <div className="md:col-span-5">
             <h3 className="text-2xl font-bold text-gray-900">Learn by Doing</h3>
             <p className="mt-2 text-gray-600">
               CustoMLearning features an interactive Create page where you can create real ML networks from scratch.
@@ -459,23 +467,23 @@ const downloadFile = (url: string, filename: string) => {
           </div>
           <div className="md:col-span-5 order-1 md:order-2">
             <img
-              src="/ads/row2.png"
+              src="/ads/test.png"
               alt="Real datasets"
-              className="w-full h-64 object-cover rounded-xl shadow"
+              className="w-full h-85 object-cover rounded-xl shadow"
             />
           </div>
         </div>
 
         {/* Row 3: image left */}
         <div className="grid md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-5">
+          <div className="md:col-span-7">
             <img
-              src="/ads/row3.png"
+              src="/ads/learn.png"
               alt="Progress tracking"
-              className="w-full h-64 object-cover rounded-xl shadow"
+              className="w-full h-81 object-cover rounded-xl shadow"
             />
           </div>
-          <div className="md:col-span-7">
+          <div className="md:col-span-5">
             <h3 className="text-2xl font-bold text-gray-900">Explore Our Curriculum and Track Your Progress</h3>
             <p className="mt-2 text-gray-600">
               Establish an in-depth understanding of AI through our curriculum that will serve you years in the future. See module scores, retakes, and milestones at a glance.
@@ -489,14 +497,14 @@ const downloadFile = (url: string, filename: string) => {
           <div className="md:col-span-7 order-2 md:order-1">
             <h3 className="text-2xl font-bold text-gray-900">Reports for Teachers</h3>
             <p className="mt-2 text-gray-600">
-              Teachers can view student progress on modules or keep tabs on student projects. Organize by student or by quiz.
+              Teachers can view student progress on modules or keep tabs on student projects. Organize by student or by quiz, and monitor as large a class as desired.
             </p>
           </div>
           <div className="md:col-span-5 order-1 md:order-2">
             <img
-              src="/ads/row2.png"
+              src="/ads/report.png"
               alt="Teacher page"
-              className="w-full h-64 object-cover rounded-xl shadow"
+              className="w-full h-80 object-cover rounded-xl shadow"
             />
           </div>
         </div>
