@@ -29,6 +29,7 @@ export default function Homepage() {
     email: "",
     password: "",
     advertiserName: "", // NEW optional field
+    system: "Mac"
   });
 
   React.useEffect(() => {
@@ -73,8 +74,6 @@ const downloadFile = (url: string, filename: string) => {
 
     try {
       let chargeAmount = 20;
-      console.log(formData.userType)
-      console.log(formData.waiverCode.trim())
       if ((formData.userType === "teacher" || formData.userType === "student") && isWaiverValid()) {
         chargeAmount = 10;
       }
@@ -111,7 +110,11 @@ const downloadFile = (url: string, filename: string) => {
       }
 
       // Trigger download (replace with your real file)
-      downloadFile("/downloads/CustoMLearning.zip", "CustoMLearning.zip");
+      if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
+      else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
+      else {downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");}
+
+      
       sessionStorage.removeItem("pendingRegistration"); 
       setStep("done");
     } catch (err: any) {
@@ -165,7 +168,9 @@ const downloadFile = (url: string, filename: string) => {
       if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
 
       // Trigger download
-      downloadFile("/downloads/CustoMLearning.zip", "CustoMLearning.zip");
+      if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
+      else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
+      else {downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");}
       sessionStorage.removeItem("pendingRegistration");
       setStep("done");
     } catch (err: any) {
@@ -184,7 +189,7 @@ const downloadFile = (url: string, filename: string) => {
         </h1>
         <p className="mt-4 text-lg text-gray-600 max-w-3xl">
           Explore and master machine learning with interactive lessons, hands-on datasets, and do-it-yourself activities, all without advanced coding knowledge.
-          Register below or continue your existing account to renew access for another year!
+          Register below or continue your existing account to renew access! Subscription is just $20/year, or less with a promo code.
         </p>
 
         {/* Registration / Login Cards */}
@@ -193,11 +198,23 @@ const downloadFile = (url: string, filename: string) => {
           <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-bold text-indigo-900">New here? Register & Pay</h2>
             <p className="text-sm text-indigo-800 mt-1">
-              Create an account and get 1 year of access.
+              Create an account and get 1 year of access for just $20.
             </p>
 
             {step === "form" && (
               <form onSubmit={handleRegister} className="mt-4 space-y-4">
+
+                <select
+                    value={formData.system}
+                    onChange={(e) => setFormData({ ...formData, system: e.target.value })}
+                    required
+                    className="border rounded-lg p-2 w-full"
+                  >
+                    <option value="Mac">Mac</option>
+                    <option value="Windows">Windows</option>
+                    <option value="Linux">Linux</option>
+                  </select>
+
                 <div>
                   <label className="block font-medium mb-1">I am a</label>
                   <select
@@ -312,7 +329,20 @@ const downloadFile = (url: string, filename: string) => {
             </p>
 
             {step === "loginForm" && (
+
               <form onSubmit={handleLogin} className="mt-4 space-y-4">
+
+                <select
+                    value={formData.system}
+                    onChange={(e) => setFormData({ ...formData, system: e.target.value })}
+                    required
+                    className="border rounded-lg p-2 w-full"
+                  >
+                    <option value="Mac">Mac</option>
+                    <option value="Windows">Windows</option>
+                    <option value="Linux">Linux</option>
+                  </select>
+
                 <div>
                   <label className="block font-medium mb-1">Email</label>
                   <input
@@ -336,6 +366,7 @@ const downloadFile = (url: string, filename: string) => {
                     required
                   />
                 </div>
+
 
                 <div>
                   <label className="block font-medium mb-1">
@@ -450,6 +481,23 @@ const downloadFile = (url: string, filename: string) => {
               Establish an in-depth understanding of AI through our curriculum that will serve you years in the future. See module scores, retakes, and milestones at a glance.
               Pick up right where you left off—on any device that has CustoMLearning downloaded.
             </p>
+          </div>
+        </div>
+
+        {/* Row 4: image right */}
+        <div className="grid md:grid-cols-12 gap-6 items-center">
+          <div className="md:col-span-7 order-2 md:order-1">
+            <h3 className="text-2xl font-bold text-gray-900">Reports for Teachers</h3>
+            <p className="mt-2 text-gray-600">
+              Teachers can view student progress on modules or keep tabs on student projects. Organize by student or by quiz.
+            </p>
+          </div>
+          <div className="md:col-span-5 order-1 md:order-2">
+            <img
+              src="/ads/row2.png"
+              alt="Teacher page"
+              className="w-full h-64 object-cover rounded-xl shadow"
+            />
           </div>
         </div>
       </section>
