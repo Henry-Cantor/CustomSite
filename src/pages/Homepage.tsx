@@ -15,10 +15,20 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { chargeUser } from "../firebase/payments";
+import PaymentModal from "../components/PaymentModal";
+
+
+
 
 type Step = "form" | "paying" | "done" | "error" | "loginForm" | "loginPay";
 
 export default function Homepage() {
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [chargeAmount, setChargeAmount] = useState(0);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const [paymentContext, setPaymentContext] = useState<"register" | "login" | null>(null);
+
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -33,14 +43,142 @@ export default function Homepage() {
   });
 
   React.useEffect(() => {
-  const data = sessionStorage.getItem("pendingRegistration");
+  const data = localStorage.getItem("pendingRegistration");
   if (data) setFormData(JSON.parse(data));
 }, []);
 
+React.useEffect(() => {
+  if (!paymentSuccess) return;
+
+  setShowPaymentModal(false);
+
+  if (paymentContext === "register") {
+    handlePostPayment();
+  } else if (paymentContext === "login") {
+    handlePostPaymentLogin();
+  }
+
+  setPaymentContext(null); // reset context
+}, [paymentSuccess]);
+
+
+
 // Save session before payment or login
 const saveSessionData = () => {
-  sessionStorage.setItem("pendingRegistration", JSON.stringify(formData));
+  localStorage.setItem("pendingRegistration", JSON.stringify(formData));
 };
+const handlePostPaymentLogin = async () => {
+  try {
+    const auth = getAuth();
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      formData.email.trim(),
+      formData.password
+    );
+    const user = userCredential.user;
+
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) throw new Error("User record not found.");
+
+    const data = snap.data() || {};
+    const now = Timestamp.now();
+
+    // Check if account is still active
+    let needsPayment = true;
+    if (data.expiresAt && data.expiresAt.toMillis() > now.toMillis()) {
+      needsPayment = false; // account still active, no payment needed
+    }
+
+    if (needsPayment) {
+      let chargeAmount = 20;
+      if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 10;
+
+      setChargeAmount(chargeAmount);
+      setShowPaymentModal(true);
+      setPaymentSuccess(false); // wait for modal success
+      return; // exit now; modal onSuccess will trigger this function again if needed
+    }
+
+    // Account active or post-payment → update expiry
+    await setDoc(userRef, { expiresAt: oneYearFromNow() }, { merge: true });
+
+    // Optional advertiser bump
+    if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
+
+    // Trigger download based on system
+    if (formData.system === "Linux") downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");
+    else if (formData.system === "Windows") downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");
+    else downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");
+
+    localStorage.removeItem("pendingRegistration");
+    setStep("done");
+  } catch (err: any) {
+    setError("Login failed: " + (err?.message || String(err)));
+    setStep("error");
+  }
+};
+
+const handlePostPayment = async () => {
+  try {
+    const auth = getAuth();
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      formData.email.trim(),
+      formData.password
+    );
+    const user = userCredential.user;
+
+    await updateProfile(user, { displayName: formData.name || formData.userType });
+
+    await setDoc(doc(db, "users", user.uid), {
+      student: formData.userType === "student",
+      teacher: formData.userType === "teacher",
+      classCode: formData.classCode || null,
+      name: formData.name || null,
+      createdAt: serverTimestamp(),
+      expiresAt: oneYearFromNow(),
+    });
+
+    if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
+
+    if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
+    else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
+    else {downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");}
+
+    localStorage.removeItem("pendingRegistration");
+    setStep("done");
+  } catch (err: any) {
+    setError("Error: " + (err?.message || String(err)));
+    setStep("error");
+  }
+};
+
+const handleCheckout = async (amount: number) => {
+  saveSessionData();
+  setStep("paying");
+  setError("");
+
+  try {
+    // After: same URL, relative path works for dev and production
+    const res = await fetch("/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: formData.email.trim(), amount: amount * 100 })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url; // redirect to Stripe Checkout
+    } else {
+      throw new Error("Failed to create checkout session.");
+    }
+  } catch (err: any) {
+    console.error(err);
+    setError("Payment failed: " + (err?.message || ""));
+    setStep("error");
+  }
+};
+
 
 const downloadFile = (url: string, filename: string) => {
   const link = document.createElement("a");
@@ -71,56 +209,62 @@ const downloadFile = (url: string, filename: string) => {
     saveSessionData();
     setStep("paying");
     setError("");
-
+    setPaymentContext("register")
     try {
       let chargeAmount = 20;
       if ((formData.userType === "teacher" || formData.userType === "student") && isWaiverValid()) {
         chargeAmount = 10;
       }
 
-      const paymentSuccess = await chargeUser(chargeAmount, {email: formData.email.trim()});
-      if (!paymentSuccess) {
-        setError("Payment failed. Please try again.");
-        setStep("error");
-        return;
-      }
 
-      const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email.trim(),
-        formData.password
-      );
-      const user = userCredential.user;
+      setChargeAmount(chargeAmount);
+      setShowPaymentModal(true);  // <-- show modal
+      setPaymentSuccess(false);
 
-      await updateProfile(user, { displayName: formData.name || formData.userType });
+      // await handleCheckout(chargeAmount)
+      //const paymentSuccess = await chargeUser(chargeAmount, {email: formData.email.trim()});
+      // if (!paymentSuccess) {
+      //   setError("Payment failed. Please try again.");
+      //   setStep("error");
+      //   return;
+      // }
 
-      await setDoc(doc(db, "users", user.uid), {
-        student: formData.userType === "student",
-        teacher: formData.userType === "teacher",
-        classCode: formData.classCode || null,
-        name: formData.name || null,
-        createdAt: serverTimestamp(),
-        expiresAt: oneYearFromNow(),
-      });
+    //   const auth = getAuth();
+    //   const userCredential = await createUserWithEmailAndPassword(
+    //     auth,
+    //     formData.email.trim(),
+    //     formData.password
+    //   );
+    //   const user = userCredential.user;
 
-      // Advertiser credit (optional)
-      if (formData.advertiserName) {
-        await bumpAdvertiser(formData.advertiserName);
-      }
+    //   await updateProfile(user, { displayName: formData.name || formData.userType });
 
-      // Trigger download (replace with your real file)
-      if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
-      else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
-      else {downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");}
+    //   await setDoc(doc(db, "users", user.uid), {
+    //     student: formData.userType === "student",
+    //     teacher: formData.userType === "teacher",
+    //     classCode: formData.classCode || null,
+    //     name: formData.name || null,
+    //     createdAt: serverTimestamp(),
+    //     expiresAt: oneYearFromNow(),
+    //   });
+
+    //   // Advertiser credit (optional)
+    //   if (formData.advertiserName) {
+    //     await bumpAdvertiser(formData.advertiserName);
+    //   }
+
+    //   // Trigger download (replace with your real file)
+    //   if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
+    //   else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
+    //   else {downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");}
 
       
-      sessionStorage.removeItem("pendingRegistration"); 
-      setStep("done");
-    } catch (err: any) {
-      setError("Error: " + (err?.message || String(err)));
-      setStep("error");
-    }
+    //   localStorage.removeItem("pendingRegistration"); 
+    //   setStep("done");
+     } catch (err: any) {
+       setError("Error: " + (err?.message || String(err)));
+       setStep("error");
+     }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -128,51 +272,58 @@ const downloadFile = (url: string, filename: string) => {
     saveSessionData();
     setStep("loginPay");
     setError("");
+    setPaymentContext("login")
 
     try {
-      const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        formData.email.trim(),
-        formData.password
-      );
-      const user = userCredential.user;
+      setChargeAmount(20);
+      setShowPaymentModal(true);  // <-- show modal
+      setPaymentSuccess(false);
 
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-      if (!snap.exists()) throw new Error("User record not found.");
+      // const auth = getAuth();
+      // const userCredential = await signInWithEmailAndPassword(
+      //   auth,
+      //   formData.email.trim(),
+      //   formData.password
+      // );
+      // const user = userCredential.user;
 
-      const data = snap.data() || {};
+      // const userRef = doc(db, "users", user.uid);
+      // const snap = await getDoc(userRef);
+      // if (!snap.exists()) throw new Error("User record not found.");
 
-      // Check expiry
-      const now = Timestamp.now();
-      let needsPayment = true;
-      if (data.expiresAt && data.expiresAt.toMillis() > now.toMillis()) {
-        // Account still active, optionally ask if user wants to renew
-        needsPayment = true; // or false if auto-free renewal
-      }
+      // const data = snap.data() || {};
 
-      if (needsPayment) {
-        // Determine charge amount
-        let chargeAmount = 20;
-        if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 10;
+      // // Check expiry
+      // const now = Timestamp.now();
+      // let needsPayment = true;
+      // if (data.expiresAt && data.expiresAt.toMillis() > now.toMillis()) {
+      //   // Account still active, optionally ask if user wants to renew
+      //   needsPayment = true; // or false if auto-free renewal
+      // }
 
-        const paymentSuccess = await chargeUser(chargeAmount, {email: formData.email.trim()});
-        if (!paymentSuccess) throw new Error("Payment failed.");
-      }
+      // if (needsPayment) {
+      //   // Determine charge amount
+      //   let chargeAmount = 20;
+      //   if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 10;
 
-      // Update expiry
-      await setDoc(userRef, { expiresAt: oneYearFromNow() }, { merge: true });
+      //   await handleCheckout(chargeAmount)
 
-      // Optional advertiser increment
-      if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
+      //   // const paymentSuccess = await chargeUser(chargeAmount, {email: formData.email.trim()});
+      //   // if (!paymentSuccess) throw new Error("Payment failed.");
+      // }
 
-      // Trigger download
-      if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
-      else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
-      else {downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");}
-      sessionStorage.removeItem("pendingRegistration");
-      setStep("done");
+      // // Update expiry
+      // await setDoc(userRef, { expiresAt: oneYearFromNow() }, { merge: true });
+
+      // // Optional advertiser increment
+      // if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
+
+      // // Trigger download
+      // if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
+      // else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
+      // else {downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");}
+      // localStorage.removeItem("pendingRegistration");
+      // setStep("done");
     } catch (err: any) {
       setError("Login failed: " + (err?.message || String(err)));
       setStep("error");
@@ -425,6 +576,18 @@ const downloadFile = (url: string, filename: string) => {
         </div>
 
         {/* Status */}
+        {/* Conditional Payment Modal */}
+        {showPaymentModal && (
+          <PaymentModal
+            email={formData.email}
+            amount={chargeAmount}
+            onSuccess={() => setPaymentSuccess(true)}
+            onError={(msg) => { setError(msg); setStep("error"); setShowPaymentModal(false); }}
+            onClose={() => {setShowPaymentModal(false); setStep("form")}}
+          />
+        )}
+
+
         {step === "done" && (
           <p className="mt-6 text-green-700 font-semibold">
             Thank you! Your download should begin shortly.
