@@ -105,7 +105,7 @@ const handlePostPaymentLogin = async () => {
 
     // Optional advertiser bump
     if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
-
+    await countLogin()
     // Trigger download based on system
     if (formData.system === "Linux") downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");
     else if (formData.system === "Windows") downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");
@@ -141,6 +141,7 @@ const handlePostPayment = async () => {
     });
 
     if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
+    await countRegister()
 
     if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
     else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
@@ -161,7 +162,7 @@ const handleCheckout = async (amount: number) => {
 
   try {
     // After: same URL, relative path works for dev and production
-    const res = await fetch("/create-checkout-session", {
+    const res = await fetch("/api/payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: formData.email.trim(), amount: amount * 100 })
@@ -200,6 +201,20 @@ const downloadFile = (url: string, filename: string) => {
     const key = rawName.trim().toLowerCase();
     if (!key) return;
     const ref = doc(db, "meta", "advertisers");
+    // increment creates the field if missing
+    await setDoc(ref, { [key]: increment(1) } as any, { merge: true });
+  };
+  const countRegister = async () => {
+    const key = "creations".trim().toLowerCase();
+    if (!key) return;
+    const ref = doc(db, "meta", "downloadActivity");
+    // increment creates the field if missing
+    await setDoc(ref, { [key]: increment(1) } as any, { merge: true });
+  };
+  const countLogin = async () => {
+    const key = "renewals".trim().toLowerCase();
+    if (!key) return;
+    const ref = doc(db, "meta", "downloadActivity");
     // increment creates the field if missing
     await setDoc(ref, { [key]: increment(1) } as any, { merge: true });
   };
