@@ -23,6 +23,8 @@ import PaymentModal from "../components/PaymentModal";
 type Step = "form" | "paying" | "done" | "error" | "loginForm" | "loginPay";
 
 export default function Homepage() {
+  const currentVersion = 1.0
+
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [chargeAmount, setChargeAmount] = useState(0);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -107,9 +109,10 @@ const handlePostPaymentLogin = async () => {
     if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
     await countLogin()
     // Trigger download based on system
-    if (formData.system === "Linux") downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");
-    else if (formData.system === "Windows") downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");
-    else downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");
+    const downloadFolder = process.env.DOWNLOAD_NAME;
+    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "CustomLinux.zip");
+    else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "CustomWindows.zip");
+    else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "CustomMac.zip");
 
     localStorage.removeItem("pendingRegistration");
     setStep("done");
@@ -138,14 +141,16 @@ const handlePostPayment = async () => {
       name: formData.name || null,
       createdAt: serverTimestamp(),
       expiresAt: oneYearFromNow(),
+      currentVersion: currentVersion
     });
 
     if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
     await countRegister()
 
-    if(formData.system === "Linux") {downloadFile("/downloads/CustomLinux.zip", "CustomLinux.zip");}
-    else if(formData.system === "Windows") {downloadFile("/downloads/CustomWindows.zip", "CustomWindows.zip");}
-    else {downloadFile("/downloads/CustomMac.zip", "CustomMac.zip");}
+    const downloadFolder = process.env.DOWNLOAD_NAME;
+    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "CustomLinux.zip");
+    else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "CustomWindows.zip");
+    else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "CustomMac.zip");
 
     localStorage.removeItem("pendingRegistration");
     setStep("done");
