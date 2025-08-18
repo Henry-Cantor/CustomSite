@@ -19,7 +19,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
 
     setLoading(true);
     try {
-      const res = await fetch("../pages/api/payment", {
+      const res = await fetch("/api/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, amount: amount * 100 }),
