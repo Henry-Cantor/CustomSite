@@ -190,12 +190,11 @@ const downloadFile = (platform: "mac" | "windows" | "linux") => {
   const link = document.createElement("a");
   link.href = url;
   link.download = `CustomLearning-${platform}.dmg`;
-
-  // This element is never added to the DOM visibly
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
+
 
 
   const validWaiverCodes = ["ax791kcl$20"];
