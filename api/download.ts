@@ -1,10 +1,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import path from 'path';
-import fs from 'fs';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   const { platform } = req.query;
 
+  // Map friendly platform names to actual file names
   const files: Record<string, string> = {
     mac: '1.0-mac.zip',
     windows: '1.0-win.zip',
@@ -12,16 +11,13 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   };
 
   const fileName = files[(platform as string)?.toLowerCase()];
-  if (!fileName) return res.status(400).send('Invalid platform');
+  if (!fileName) return res.status(400).json({ error: 'Invalid platform' });
 
+  // Use environment variable for folder
   const downloadsFolder = process.env.DOWNLOAD_NAME;
-  if (!downloadsFolder) return res.status(500).send('Server misconfigured');
+  if (!downloadsFolder) return res.status(500).json({ error: 'DOWNLOAD_NAME not set' });
 
-  const filePath = path.resolve(process.cwd(), downloadsFolder, fileName);
-  if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
+  const fileUrl = `/${downloadsFolder}/${fileName}`;
 
-  res.setHeader('Content-Disposition', `attachment; filename="CustomLearning-${platform}.zip"`);
-  res.setHeader('Content-Type', 'application/octet-stream');
-
-  fs.createReadStream(filePath).pipe(res);
+  res.status(200).json({ url: fileUrl });
 }

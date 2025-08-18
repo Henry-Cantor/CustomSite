@@ -184,16 +184,22 @@ const handleCheckout = async (amount: number) => {
   }
 };
 
-const downloadFile = (platform: "mac" | "windows" | "linux") => {
-  const url = `/api/download?platform=${platform}`;
+const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
+  const res = await fetch(`/api/download?platform=${platform}`);
+  const data = await res.json();
+  if (!data.url) {
+    alert('Download not available');
+    return;
+  }
 
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `CustomLearning-${platform}.dmg`;
+  const link = document.createElement('a');
+  link.href = data.url;
+  link.download = `CustomLearning-${platform}.zip`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
+
 
 
 
