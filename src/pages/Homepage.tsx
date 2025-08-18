@@ -107,7 +107,7 @@ const handlePostPaymentLogin = async () => {
     if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
     await countLogin()
     // Trigger download based on system
-    const downloadFolder = process.env.REACT_APP_DOWNLOAD_NAME;
+    const downloadFolder = process.env.DOWNLOAD_NAME;
     if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "linuxDownload.zip");
     else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "winDownload.zip");
     else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "macDownload.zip");
