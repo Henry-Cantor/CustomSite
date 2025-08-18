@@ -6,9 +6,9 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   const { platform } = req.query;
 
   const files: Record<string, string> = {
-    mac: '1.0-mac.dmg',
-    windows: '1.0-win.dmg',
-    linux: '1.0-linux.dmg',
+    mac: '1.0-mac.zip',
+    windows: '1.0-win.zip',
+    linux: '1.0-linux.zip',
   };
 
   const fileName = files[(platform as string)?.toLowerCase()];
