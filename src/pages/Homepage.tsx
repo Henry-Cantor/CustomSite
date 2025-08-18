@@ -106,11 +106,11 @@ const handlePostPaymentLogin = async () => {
     // Optional advertiser bump
     if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
     await countLogin()
+
     // Trigger download based on system
-    const downloadFolder = process.env.DOWNLOAD_NAME;
-    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "linuxDownload.zip");
-    else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "winDownload.zip");
-    else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "macDownload.zip");
+    if (formData.system === "Linux") downloadFile("linux");
+    else if (formData.system === "Windows") downloadFile("windows");
+    else downloadFile("mac");
 
     localStorage.removeItem("pendingRegistration");
     setStep("done");
@@ -144,10 +144,9 @@ const handlePostPayment = async () => {
     if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
     await countRegister()
 
-    const downloadFolder = process.env.DOWNLOAD_NAME;
-    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "linuxDownload.zip");
-    else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "winDownload.zip");
-    else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "macDownload.zip");
+    if (formData.system === "Linux") downloadFile("linux");
+    else if (formData.system === "Windows") downloadFile("windows");
+    else downloadFile("mac");
 
     localStorage.removeItem("pendingRegistration");
     setStep("done");
@@ -156,6 +155,9 @@ const handlePostPayment = async () => {
     setStep("error");
   }
 };
+
+
+
 
 const handleCheckout = async (amount: number) => {
   saveSessionData();
@@ -182,11 +184,14 @@ const handleCheckout = async (amount: number) => {
   }
 };
 
+const downloadFile = (platform: "mac" | "windows" | "linux") => {
+  const url = `/api/download?platform=${platform}`;
 
-const downloadFile = (url: string, filename: string) => {
   const link = document.createElement("a");
   link.href = url;
-  link.download = filename; // forces download
+  link.download = `CustomLearning-${platform}.dmg`;
+
+  // This element is never added to the DOM visibly
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
