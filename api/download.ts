@@ -20,7 +20,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   const filePath = path.resolve(process.cwd(), downloadsFolder, fileName);
   if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
 
-  res.setHeader('Content-Disposition', `attachment; filename="CustomLearning-${platform}.dmg"`);
+  res.setHeader('Content-Disposition', `attachment; filename="CustomLearning-${platform}.zip"`);
   res.setHeader('Content-Type', 'application/octet-stream');
 
   fs.createReadStream(filePath).pipe(res);
