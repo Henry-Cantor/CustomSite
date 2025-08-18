@@ -109,7 +109,7 @@ const handlePostPaymentLogin = async () => {
     await countLogin()
     // Trigger download based on system
     const downloadFolder = process.env.DOWNLOAD_NAME;
-    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "linuxDownload.zip");
+    if (formData.system === "Linux") downloadFile(`/downloads_a$189&640*91&ALMaj*7@2aN90/1.0-linux.zip`, "linuxDownload.zip");
     else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "winDownload.zip");
     else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "macDownload.zip");
 
