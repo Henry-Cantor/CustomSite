@@ -109,9 +109,9 @@ const handlePostPaymentLogin = async () => {
     await countLogin()
     // Trigger download based on system
     const downloadFolder = process.env.DOWNLOAD_NAME;
-    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "CustomLinux.zip");
-    else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "CustomWindows.zip");
-    else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "CustomMac.zip");
+    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "linuxDownload.zip");
+    else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "winDownload.zip");
+    else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "macDownload.zip");
 
     localStorage.removeItem("pendingRegistration");
     setStep("done");
@@ -146,9 +146,9 @@ const handlePostPayment = async () => {
     await countRegister()
 
     const downloadFolder = process.env.DOWNLOAD_NAME;
-    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "CustomLinux.zip");
-    else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "CustomWindows.zip");
-    else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "CustomMac.zip");
+    if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "linuxDownload.zip");
+    else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "winDownload.zip");
+    else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "macDownload.zip");
 
     localStorage.removeItem("pendingRegistration");
     setStep("done");
