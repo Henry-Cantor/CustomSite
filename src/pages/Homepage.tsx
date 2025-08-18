@@ -23,7 +23,6 @@ import PaymentModal from "../components/PaymentModal";
 type Step = "form" | "paying" | "done" | "error" | "loginForm" | "loginPay";
 
 export default function Homepage() {
-
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [chargeAmount, setChargeAmount] = useState(0);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -109,6 +108,7 @@ const handlePostPaymentLogin = async () => {
     await countLogin()
     // Trigger download based on system
     const downloadFolder = process.env.DOWNLOAD_NAME;
+    console.log(`download folder: ${downloadFolder}`)
     if (formData.system === "Linux") downloadFile(`/${downloadFolder}/1.0-linux.zip`, "linuxDownload.zip");
     else if (formData.system === "Windows") downloadFile(`/${downloadFolder}/1.0-win.zip`, "winDownload.zip");
     else downloadFile(`/${downloadFolder}/1.0-mac.zip`, "macDownload.zip");
@@ -350,6 +350,7 @@ const downloadFile = (url: string, filename: string) => {
 
 
   return (
+
     <div className="max-w-7xl mx-auto w-full px-6 py-10 space-y-12">
     <section className="bg-white rounded-2xl shadow p-8 md:p-10">
       <div className="relative bg-gradient-to-r from-indigo-900 via-gray-900 to-indigo-900 rounded-2xl">
