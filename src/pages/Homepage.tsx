@@ -23,7 +23,6 @@ import PaymentModal from "../components/PaymentModal";
 type Step = "form" | "paying" | "done" | "error" | "loginForm" | "loginPay";
 
 export default function Homepage() {
-  const currentVersion = 1.0
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [chargeAmount, setChargeAmount] = useState(0);
@@ -140,8 +139,7 @@ const handlePostPayment = async () => {
       classCode: formData.classCode || null,
       name: formData.name || null,
       createdAt: serverTimestamp(),
-      expiresAt: oneYearFromNow(),
-      currentVersion: currentVersion
+      expiresAt: oneYearFromNow()
     });
 
     if (formData.advertiserName) await bumpAdvertiser(formData.advertiserName);
