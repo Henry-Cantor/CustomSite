@@ -185,7 +185,7 @@ const handleCheckout = async (amount: number) => {
 };
 
 const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
-  const res = await fetch(`/api/download?platform=${platform}`);
+  const res = await fetch(`/api/download?file=${platform}`);
   const data = await res.json();
   if (!data.url) {
     alert('Download not available');
