@@ -1,23 +1,45 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import AWS from 'aws-sdk';
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  const { platform } = req.query;
+// Initialize R2 (S3-compatible)
+const s3 = new AWS.S3({
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  accessKeyId: process.env.R2_ACCESS_KEY_ID,
+  secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  signatureVersion: 'v4',
+});
 
-  // Map friendly platform names to actual file names
-  const files: Record<string, string> = {
-    mac: '1.0-mac.zip',
-    windows: '1.0-win.zip',
-    linux: '1.0-linux.zip',
-  };
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  try {
+    const { file } = req.query;
 
-  const fileName = files[(platform as string)?.toLowerCase()];
-  if (!fileName) return res.status(400).json({ error: 'Invalid platform' });
+    // Map friendly names to R2 keys
+    const files: Record<string, string> = {
+        //1.0-mac.zip
+      mac: 'example4.zip',
+      windows: 'example4.zip',
+      linux: 'example4.zip',
+      example4: 'example4.zip', // <-- extra dataset
+    };
 
-  // Use environment variable for folder
-  const downloadsFolder = process.env.DOWNLOAD_NAME;
-  if (!downloadsFolder) return res.status(500).json({ error: 'DOWNLOAD_NAME not set' });
+    const fileName = files[(file as string)?.toLowerCase()];
+    if (!fileName) return res.status(400).json({ error: 'Invalid file requested' });
 
-  const fileUrl = `/${downloadsFolder}/${fileName}`;
+    const bucket = process.env.R2_BUCKET;
+    if (!bucket) return res.status(500).json({ error: 'R2_BUCKET not set' });
 
-  res.status(200).json({ url: fileUrl });
+    // Generate signed URL
+    const url = s3.getSignedUrl('getObject', {
+      Bucket: bucket,
+      Key: fileName,
+      Expires: 300, // URL valid for 5 minutes
+    });
+
+    res.status(200).json({ url });
+  } catch (err) {
+    console.error('Handler error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 }

@@ -368,7 +368,10 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
       Welcome to <span className="text-indigo-400">CustoMLearning</span>!!
     </h1>
     <p className="mt-6 text-lg text-gray-200 max-w-3xl mx-auto">
-      Explore and master machine learning with interactive lessons, hands-on datasets, and do-it-yourself activities — all without advanced coding knowledge.
+      Are you a student, researcher, or entrepeneur? Do you want to learn about AI and create custom machine learning at the professional level? If so, CustoMLearning might be for you!
+      <br />
+      <br />
+      Explore and master machine learning with interactive lessons, hands-on datasets, and highly customizable & accurate ML model templates — all without advanced coding knowledge.
       <br />
       Register below or continue your existing account to renew access! Subscription is just{" "}
       <span className="font-semibold text-white">$20/year</span>, or less with a promo code.
@@ -465,6 +468,7 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
                     required
                   />
                 </div>
+                <p className="text-xs">Please remember your password! If you do forget, email henrylcantor@icloud.com.</p>
 
                 {(formData.userType === "teacher" || formData.userType === "student") && (
                   <div>

@@ -31,7 +31,12 @@ export default function Datasets() {
       id: 4,
       title: "Pets Classification (Image Folder)",
       desc: "Public-domain dataset of cats, dogs, and birds for image classification practice.",
-      link: "/exampleData/example4.zip",
+      link: async () => {
+        const res = await fetch("/api/download?file=example4");
+        if (!res.ok) throw new Error(`Failed to get download URL: ${res.status}`);
+        const data = await res.json();
+        return data.url; // this is the signed Cloudflare R2 URL
+      },
       icon: <Dog className="w-6 h-6 text-pink-600" />,
     },
     {
@@ -42,7 +47,7 @@ export default function Datasets() {
       icon: <Heart className="w-6 h-6 text-red-500" />,
     },
   ];
-
+  
   const renderCard = (ds: any) => (
     <div
       key={ds.id}
@@ -53,13 +58,27 @@ export default function Datasets() {
         <h3 className="text-lg font-semibold text-center">{ds.id}. {ds.title}</h3>
       </div>
       <p className="text-gray-600 text-center flex-grow">{ds.desc}</p>
-      <a
-        href={ds.link}
-        className="mt-4 inline-block px-4 py-2 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition text-center"
-        download
+      <button
+        className="mt-4 px-4 py-2 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition text-center"
+        onClick={async () => {
+          try {
+            // Get URL: either async function or string
+            const url = typeof ds.link === 'function' ? await ds.link() : ds.link;
+
+            // Trigger download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = ""; // optional: can set a filename here
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          } catch (err) {
+            console.error('Download failed', err);
+          }
+        }}
       >
         Download
-      </a>
+      </button>
     </div>
   );
 
