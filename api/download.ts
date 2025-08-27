@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Map friendly names to R2 keys
     const files: Record<string, string> = {
         //1.0-mac.zip
-      mac: 'example4.zip',
+      mac: 'CustoMLearning-1.0.0-arm64.dmg',
       windows: 'example4.zip',
       linux: 'example4.zip',
       example4: 'example4.zip', // <-- extra dataset
@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const url = s3.getSignedUrl('getObject', {
       Bucket: bucket,
       Key: fileName,
-      Expires: 300, // URL valid for 5 minutes
+      Expires: 1800, // URL valid for 5 minutes
     });
 
     res.status(200).json({ url });
