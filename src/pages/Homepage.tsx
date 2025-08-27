@@ -401,8 +401,8 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
                     className="border rounded-lg p-2 w-full"
                   >
                     <option value="Mac">Mac</option>
-                    <option value="Windows">Windows</option>
-                    <option value="Linux">Linux</option>
+                    {/* <option value="Windows">Windows</option>
+                    <option value="Linux">Linux</option> */}
                   </select>
 
                 <div>
@@ -530,8 +530,8 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
                     className="border rounded-lg p-2 w-full"
                   >
                     <option value="Mac">Mac</option>
-                    <option value="Windows">Windows</option>
-                    <option value="Linux">Linux</option>
+                    {/* <option value="Windows">Windows</option>
+                    <option value="Linux">Linux</option> */}
                   </select>
 
                 <div>
