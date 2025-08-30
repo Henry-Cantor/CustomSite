@@ -358,38 +358,40 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
   };
 
 
-  return (
-
-    <div className="max-w-7xl mx-auto w-full px-6 py-10 space-y-12">
-    <section className="bg-white rounded-2xl shadow p-8 md:p-10">
+return (
+<div className="mx-auto max-w-7xl sm:px-6 px-0 py-0 sm:py-0 text-center lg:py-0">
+    <section className="bg-white rounded-2xl shadow sm:p-8 md:p-10 p-0">
       <div className="relative bg-gradient-to-r from-indigo-900 via-gray-900 to-indigo-900 rounded-2xl">
-  <div className="mx-auto max-w-7xl px-6 py-16 text-center sm:py-24 lg:py-32">
-    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-      Welcome to <span className="text-indigo-400">CustoMLearning</span>!!
-    </h1>
-    <p className="mt-6 text-lg text-gray-200 max-w-3xl mx-auto">
-      Are you a student, researcher, or entrepeneur? Do you want to learn about AI and create custom machine learning at the professional level? If so, CustoMLearning might be for you!
-      <br />
-      <br />
-      Explore and master machine learning with interactive lessons, hands-on datasets, and highly customizable & accurate ML model templates — all without advanced coding knowledge.
-      <br />
-      Register below or continue your existing account to renew access! Subscription is just{" "}
-      <span className="font-semibold text-white">$20/year</span>, or less with a promo code.
-    </p>
-    
-  </div>
-</div>
-
-
-      {/* Hero / Intro */}
-        {/* Registration / Login Cards */}
-        <div className="mt-8 grid md:grid-cols-2 gap-6">
-          {/* Register */}
-          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-indigo-900">New here? Register & Pay</h2>
-            <p className="text-sm text-indigo-800 mt-1">
-              Create an account and get 1 year of access for just $20.
+        <div className="mx-auto max-w-7xl px-0 sm:px-6 py-12 sm:py-16 text-center lg:py-32">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+            Welcome to <span className="text-indigo-400">CustoMLearning</span>!!
+          </h1>
+          <p className="mt-6 text-base sm:text-lg text-gray-200 max-w-3xl mx-auto">
+            Are you a student, researcher, or entrepeneur? Do you want to learn about AI and create custom machine learning at the professional level? If so, CustoMLearning might be for you!
+            <br />
+            Explore and master machine learning with interactive lessons, hands-on datasets, and highly customizable & accurate ML model templates — all without advanced coding knowledge.
+            <br />
+            Subscription is just{" "}
+            <span className="font-semibold text-white">$20/year</span>, or less with a promo code.
+            <br />
+            <br />
+            <br />
+            <p className="text-lg md:text-2xl">
+              NEW YouTube demos and 1st Place research tutorials every week!!! Or follow us on Instagram! <strong>@customlearning_llc</strong>
             </p>
+          </p>
+        </div>
+      </div>
+
+      {/* Registration / Login Cards */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Register */}
+        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-sm">
+          <h2 className="text-lg sm:text-xl font-bold text-indigo-900">New here? Register & Pay</h2>
+          <p className="text-xs sm:text-sm text-indigo-800 mt-1">
+            Create an account and get 1 year of access for just $20.<br></br>
+            PLEASE PAY ON A COMPUTER
+          </p>
 
             {step === "form" && (
               <form onSubmit={handleRegister} className="mt-4 space-y-4">
@@ -513,11 +515,11 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
           </div>
 
           {/* Login / Renew */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900">Continue Existing Account</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Log in to renew your access for another year.
-            </p>
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">Continue Existing Account</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+            Log in to renew your access for another year.
+          </p>
 
             {step === "loginForm" && (
 
@@ -630,20 +632,22 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
         )}
       </section>
 
+
       {/* Promo Rows */}
-      <section className="space-y-10">
-        {/* Row 1: image left */}
-        <div className="grid md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-7">
-            <img
-              src="/ads/create2.png"
-              alt="Learn visually"
-              className="w-full h-200 object-cover rounded-xl shadow"
-            />
-          </div>
-          <div className="md:col-span-5">
-            <h3 className="text-2xl font-bold text-gray-900">Learn by Doing</h3>
-            <p className="mt-2 text-gray-600">
+    <section className="space-y-10">
+      {/* Row 1 */}
+      <br></br>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <div className="md:col-span-7">
+          <img
+            src="/ads/create2.png"
+            alt="Learn visually"
+            className="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl shadow"
+          />
+        </div>
+        <div className="md:col-span-5">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Learn by Doing</h3>
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
               CustoMLearning features an interactive Create page where you can create real ML networks from scratch.
               Customize different features, pick your own model types and structure, and make AI to evaluate CSV files and image folders!
               Models and evaluation graphs are saved to your device, and all of your projects are tracked for your convenience.
@@ -651,57 +655,59 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
           </div>
         </div>
 
-        {/* Row 2: image right */}
-        <div className="grid md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-7 order-2 md:order-1">
-            <h3 className="text-2xl font-bold text-gray-900">Real-World Data and Testing</h3>
-            <p className="mt-2 text-gray-600">
+        {/* Row 2 */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        {/* Text First on Mobile */}
+        <div className="md:col-span-5 order-2 md:order-1">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Real-World Data and Testing</h3>
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
               Work with our datasets to see how what you learn impacts the real world, or find your own data to conduct research on.
               An interactive Testing module allows for you to make real-time inferences simply by uploading your model and choice of data.
             </p>
           </div>
-          <div className="md:col-span-5 order-1 md:order-2">
-            <img
-              src="/ads/test.png"
-              alt="Real datasets"
-              className="w-full h-85 object-cover rounded-xl shadow"
-            />
-          </div>
+          <div className="md:col-span-7 order-1 md:order-2">
+          <img
+            src="/ads/test.png"
+            alt="Datasets"
+            className="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl shadow"
+          />
+        </div>
         </div>
 
-        {/* Row 3: image left */}
-        <div className="grid md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-7">
-            <img
-              src="/ads/learn.png"
-              alt="Progress tracking"
-              className="w-full h-81 object-cover rounded-xl shadow"
-            />
-          </div>
-          <div className="md:col-span-5">
-            <h3 className="text-2xl font-bold text-gray-900">Explore Our Curriculum and Track Your Progress</h3>
-            <p className="mt-2 text-gray-600">
+        {/* Row 3 */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <div className="md:col-span-7">
+          <img
+            src="/ads/learn.png"
+            alt="Training models"
+            className="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl shadow"
+          />
+        </div>
+        <div className="md:col-span-5">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Explore Our Curriculum and Track Your Progress</h3>
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
               Establish an in-depth understanding of AI through our curriculum that will serve you years in the future. See module scores, retakes, and milestones at a glance.
               Pick up right where you left off—on any device that has CustoMLearning downloaded.
             </p>
           </div>
         </div>
 
-        {/* Row 4: image right */}
-        <div className="grid md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-7 order-2 md:order-1">
-            <h3 className="text-2xl font-bold text-gray-900">Reports for Teachers</h3>
-            <p className="mt-2 text-gray-600">
+        {/* Row 4 */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        {/* Text First on Mobile */}
+        <div className="md:col-span-5 order-2 md:order-1">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Reports for Teachers</h3>
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
               Teachers can view student progress on modules or keep tabs on student projects. Organize by student or by quiz, and monitor as large a class as desired.
             </p>
           </div>
-          <div className="md:col-span-5 order-1 md:order-2">
-            <img
-              src="/ads/report.png"
-              alt="Teacher page"
-              className="w-full h-80 object-cover rounded-xl shadow"
-            />
-          </div>
+          <div className="md:col-span-7 order-1 md:order-2">
+          <img
+            src="/ads/report.png"
+            alt="Deploy models"
+            className="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl shadow"
+          />
+        </div>
         </div>
       </section>
     </div>

@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import Homepage from "./pages/Homepage";
 import Datasets from "./pages/Datasets";
 import Privacy from "./pages/Privacy";
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import { Menu, X } from "lucide-react";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-console.log(stripePromise)
 
 function MLIcon() {
   return (
@@ -33,8 +33,9 @@ function MLIcon() {
 }
 
 export default function App() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
-    
     <div className="flex flex-col min-h-screen bg-gray-100">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 shadow bg-gray-900 text-white">
@@ -51,56 +52,74 @@ export default function App() {
             </span>
           </NavLink>
 
-          {/* Links */}
-          <div className="flex space-x-8">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `font-semibold text-lg transition-colors ${
-                  isActive
-                    ? "text-indigo-400 border-b-2 border-indigo-400"
-                    : "hover:text-indigo-400"
-                }`
-              }
-            >
-              Home
-            </NavLink>
-            <NavLink
-              to="/datasets"
-              className={({ isActive }) =>
-                `font-semibold text-lg transition-colors ${
-                  isActive
-                    ? "text-indigo-400 border-b-2 border-indigo-400"
-                    : "hover:text-indigo-400"
-                }`
-              }
-            >
-              Datasets
-            </NavLink>
-            <NavLink
-              to="/privacy"
-              className={({ isActive }) =>
-                `font-semibold text-lg transition-colors ${
-                  isActive
-                    ? "text-indigo-400 border-b-2 border-indigo-400"
-                    : "hover:text-indigo-400"
-                }`
-              }
-            >
-              Privacy
-            </NavLink>
+          {/* Desktop links */}
+          <div className="hidden md:flex space-x-8">
+            {["/", "/datasets", "/privacy"].map((path, i) => {
+              const labels = ["Home", "Datasets", "Privacy"];
+              return (
+                <NavLink
+                  key={path}
+                  to={path}
+                  className={({ isActive }) =>
+                    `font-semibold text-lg transition-colors ${
+                      isActive
+                        ? "text-indigo-400 border-b-2 border-indigo-400"
+                        : "hover:text-indigo-400"
+                    }`
+                  }
+                >
+                  {labels[i]}
+                </NavLink>
+              );
+            })}
           </div>
+
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
+
+        {/* Mobile links */}
+        {mobileOpen && (
+          <div className="flex flex-col space-y-4 px-6 pb-4 md:hidden bg-gray-800">
+            {["/", "/datasets", "/privacy"].map((path, i) => {
+              const labels = ["Home", "Datasets", "Privacy"];
+              return (
+                <NavLink
+                  key={path}
+                  to={path}
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) =>
+                    `font-semibold text-lg transition-colors ${
+                      isActive
+                        ? "text-indigo-400"
+                        : "hover:text-indigo-400"
+                    }`
+                  }
+                >
+                  {labels[i]}
+                </NavLink>
+              );
+            })}
+          </div>
+        )}
       </nav>
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-auto max-w-7xl mx-auto w-full">
         <Routes>
-          <Route path="/" element={
-            <Elements stripe={stripePromise}>
-              <Homepage />
-            </Elements>
-          } />
+          <Route
+            path="/"
+            element={
+              <Elements stripe={stripePromise}>
+                <Homepage />
+              </Elements>
+            }
+          />
           <Route path="/datasets" element={<Datasets />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<Homepage />} />

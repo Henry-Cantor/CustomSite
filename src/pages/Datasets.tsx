@@ -1,5 +1,5 @@
 import React from "react";
-import { FileSpreadsheet, FileArchive, Heart, Home, Car, Dog } from "lucide-react";
+import { FileSpreadsheet, Heart, Home, Car, Dog } from "lucide-react";
 
 export default function Datasets() {
   const topRow = [
@@ -35,7 +35,7 @@ export default function Datasets() {
         const res = await fetch("/api/download?file=example4");
         if (!res.ok) throw new Error(`Failed to get download URL: ${res.status}`);
         const data = await res.json();
-        return data.url; // this is the signed Cloudflare R2 URL
+        return data.url;
       },
       icon: <Dog className="w-6 h-6 text-pink-600" />,
     },
@@ -47,33 +47,32 @@ export default function Datasets() {
       icon: <Heart className="w-6 h-6 text-red-500" />,
     },
   ];
-  
+
   const renderCard = (ds: any) => (
     <div
       key={ds.id}
-      className="rounded-2xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition flex flex-col items-center w-80"
+      className="rounded-2xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition flex flex-col items-center w-full max-w-xs"
     >
       <div className="flex items-center gap-3 mb-3">
         {ds.icon}
-        <h3 className="text-lg font-semibold text-center">{ds.id}. {ds.title}</h3>
+        <h3 className="text-lg font-semibold text-center">
+          {ds.id}. {ds.title}
+        </h3>
       </div>
       <p className="text-gray-600 text-center flex-grow">{ds.desc}</p>
       <button
         className="mt-4 px-4 py-2 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition text-center"
         onClick={async () => {
           try {
-            // Get URL: either async function or string
-            const url = typeof ds.link === 'function' ? await ds.link() : ds.link;
-
-            // Trigger download
-            const a = document.createElement('a');
+            const url = typeof ds.link === "function" ? await ds.link() : ds.link;
+            const a = document.createElement("a");
             a.href = url;
-            a.download = ""; // optional: can set a filename here
+            a.download = "";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
           } catch (err) {
-            console.error('Download failed', err);
+            console.error("Download failed", err);
           }
         }}
       >
@@ -89,12 +88,12 @@ export default function Datasets() {
       </h2>
 
       {/* Top row */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 justify-items-center mb-6">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-items-center mb-6">
         {topRow.map(renderCard)}
       </div>
 
-      {/* Bottom row centered */}
-      <div className="flex justify-center gap-6">
+      {/* Bottom row */}
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 justify-items-center">
         {bottomRow.map(renderCard)}
       </div>
     </div>
