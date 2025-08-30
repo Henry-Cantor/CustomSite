@@ -377,7 +377,7 @@ return (
             <br />
             <br />
             <p className="text-lg md:text-2xl">
-              NEW YouTube demos and 1st Place research tutorials every week!!! Or follow us on Instagram! <strong>@customlearning_llc</strong>
+              NEW <a href="http://www.youtube.com/@customlearning_llc" target="_blank" style={{ textDecoration: "underline" }}>YouTube Demos</a> and 1st Place research tutorials every week!!! Or follow us on Instagram! <strong>@customlearning_llc</strong>
             </p>
           </p>
         </div>
