@@ -19,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const files: Record<string, string> = {
         //1.0-mac.zip
       mac: 'CustoMLearning-1.0.0-arm64.dmg',
-      windows: 'example4.zip',
+      windows: 'CustoMLearning-Setup.exe',
       linux: 'example4.zip',
       example4: 'example4.zip', // <-- extra dataset
     };

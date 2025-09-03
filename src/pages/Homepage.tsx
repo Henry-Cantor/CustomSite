@@ -403,9 +403,12 @@ return (
                     className="border rounded-lg p-2 w-full"
                   >
                     <option value="Mac">Mac</option>
-                    {/* <option value="Windows">Windows</option>
-                    <option value="Linux">Linux</option> */}
+                    <option value="Windows">Windows</option>
+                    {/* <option value="Linux">Linux</option> */}
                   </select>
+
+                  <p className="text-xs">For Windows, we are raising funds for a code signing certificate. During this interim, Windows will tell you there are unchecked files/it protected your PC. Please ignore this as Windows only does this to obtain money from developers. We conducted extensive and intense testing to ensure all files are safe for your installation.</p>
+
 
                 <div>
                   <label className="block font-medium mb-1">I am a</label>
@@ -532,9 +535,10 @@ return (
                     className="border rounded-lg p-2 w-full"
                   >
                     <option value="Mac">Mac</option>
-                    {/* <option value="Windows">Windows</option>
-                    <option value="Linux">Linux</option> */}
+                    <option value="Windows">Windows</option>
+                    {/* <option value="Linux">Linux</option> */}
                   </select>
+                
 
                 <div>
                   <label className="block font-medium mb-1">Email</label>
@@ -572,6 +576,7 @@ return (
                     className="border rounded-lg p-2 w-full"
                     placeholder="e.g. alex"
                   />
+                  
                 </div>
 
                 <div className="pt-2">
