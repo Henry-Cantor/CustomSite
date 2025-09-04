@@ -22,7 +22,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
       const res = await fetch("/api/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, amount: amount * 100 }),
+        body: JSON.stringify({ email, amount: amount * 100 + amount * 100 * 0.06625 }),
       });
       const data = await res.json();
       const clientSecret = data.clientSecret;
@@ -50,7 +50,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
       <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
         <h2 className="text-xl font-bold">Payment</h2>
-        <p>Enter your card details to pay ${amount}:</p>
+        <p>Enter your card details to pay ${amount} + sales tax:</p>
 
         <div className="border rounded-lg p-3">
           <CardElement options={{
@@ -67,7 +67,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
             disabled={!stripe || !elements || loading}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded"
           >
-            {loading ? "Processing..." : `Pay $${amount}`}
+            {loading ? "Processing..." : `Pay $${amount + amount * 0.06625}`}
           </button>
           <button
             onClick={() => onClose && onClose()}
