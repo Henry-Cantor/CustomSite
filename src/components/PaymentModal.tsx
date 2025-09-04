@@ -22,7 +22,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
       const res = await fetch("/api/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, amount: amount * 100 + amount * 100 * 0.06625 }),
+        body: JSON.stringify({ email, amount: (amount * 100 + amount * 100 * 0.06625) }),
       });
       const data = await res.json();
       const clientSecret = data.clientSecret;
