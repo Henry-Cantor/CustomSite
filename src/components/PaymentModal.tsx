@@ -22,7 +22,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
       const res = await fetch("/api/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, amount: (amount * 100 + amount * 100 * 0.06625) }),
+        body: JSON.stringify({ email, amount: Math.round(amount * 100 + amount * 100 * 0.06625) }),
       });
       const data = await res.json();
       const clientSecret = data.clientSecret;
@@ -67,7 +67,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
             disabled={!stripe || !elements || loading}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded"
           >
-            {loading ? "Processing..." : `Pay $${amount + amount * 0.06625}`}
+            {loading ? "Processing..." : `Pay $${Math.round(amount + amount * 0.06625)}`}
           </button>
           <button
             onClick={() => onClose && onClose()}
