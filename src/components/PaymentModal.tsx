@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { useState } from "react";
+import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 type Props = {
   email: string;
@@ -13,36 +13,31 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-
-  // Create PaymentIntent as soon as modal opens
-  useEffect(() => {
-    fetch("/api/payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, amount: amount * 100 }),
-    })
-      .then(res => res.json())
-      .then(data => setClientSecret(data.clientSecret))
-      .catch(err => onError(err.message || String(err)));
-  }, [email, amount, onError]);
 
   const handlePay = async () => {
-    if (!stripe || !elements || !clientSecret) return;
+    if (!stripe || !elements) return;
 
     setLoading(true);
     try {
-      const result = await stripe.confirmPayment({
-        elements,
-        clientSecret,
-        confirmParams: {
-          return_url: window.location.href, // Stripe will redirect on success
-        },
+      const res = await fetch("/api/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, amount: amount * 100 }),
       });
+      const data = await res.json();
+      const clientSecret = data.clientSecret;
+
+      const card = elements.getElement(CardElement);
+      if (!card) throw new Error("Card element not found");
+
+      const result = await stripe.confirmCardPayment(clientSecret, { payment_method: { card } });
 
       if (result.error) {
-        // Show error to your user
         onError(result.error.message || "Payment failed");
+      } else if (result.paymentIntent?.status === "succeeded") {
+        onSuccess();
+      } else {
+        onError("Payment failed for unknown reason");
       }
     } catch (err: any) {
       onError(err.message || String(err));
@@ -55,13 +50,16 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
       <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
         <h2 className="text-xl font-bold">Payment</h2>
-        <p>You’ll be charged ${amount} (+ tax if applicable):</p>
+        <p>Enter your card details to pay ${amount}:</p>
 
-        {clientSecret && (
-          <div className="border rounded-lg p-3">
-            <PaymentElement options={{ layout: "tabs" }} />
-          </div>
-        )}
+        <div className="border rounded-lg p-3">
+          <CardElement options={{
+            style: {
+              base: { fontSize: "16px", color: "#111827", "::placeholder": { color: "#9ca3af" } },
+              invalid: { color: "#ef4444" }
+            }
+          }} />
+        </div>
 
         <div className="flex justify-end space-x-2">
           <button

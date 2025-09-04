@@ -10,15 +10,12 @@ export default async function handler(req, res) {
   try {
     const { amount } = req.body;
 
-    // Create a PaymentIntent with Stripe Tax enabled
+    // Create a PaymentIntent with Stripe
     const paymentIntent = await stripe.paymentIntents.create({
       amount, // in cents (e.g., 2000 = $20)
       currency: "usd",
       automatic_payment_methods: {
         enabled: true,
-      },
-      automatic_tax: {
-        enabled: true, // ✅ tax calculation
       },
     });
 
