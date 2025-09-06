@@ -59,7 +59,9 @@ export default async function handler(req, res) {
       amount, // already in cents from frontend
       currency: "usd",
       automatic_payment_methods: { enabled: true },
+      receipt_email: email,
       description: "CustoMLearning Subscription",
+      automatic_tax: { enabled: true },
       shipping: {
         name,
         address: safeAddress,
