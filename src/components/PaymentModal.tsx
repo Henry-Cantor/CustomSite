@@ -118,7 +118,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             email,
-            amount: Math.round(amount * 100),
+            amount: Math.round(amount * 100 + amount * 100 * 0.06625),
             name: billingDetails.name || "N/A",
             address: {
               line1: billingDetails.line1 || "N/A",
@@ -173,7 +173,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
       <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
         <h2 className="text-xl font-bold">Payment</h2>
-        <p>Enter your billing and card details to pay ${amount} (tax calculated at checkout):</p>
+        <p>Enter your billing and card details to pay ${amount} (+ tax):</p>
 
         <div className="space-y-2">
           <input
@@ -243,7 +243,7 @@ export default function PaymentModal({ email, amount, onSuccess, onError, onClos
             disabled={!stripe || !elements || loading}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded"
           >
-            {loading ? "Processing..." : `Pay $${amount}`}
+            {loading ? "Processing..." : `Pay $${Math.round((amount + amount * 0.06625)*100)/100}`}
           </button>
           <button
             onClick={() => onClose && onClose()}
