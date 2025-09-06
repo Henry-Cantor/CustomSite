@@ -8,14 +8,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { amount } = req.body;
+    const { email, amount, address, name } = req.body;
 
-    // Create a PaymentIntent with Stripe
+    // Create a PaymentIntent with automatic tax
     const paymentIntent = await stripe.paymentIntents.create({
-      amount, // in cents (e.g., 2000 = $20)
+      amount,
       currency: "usd",
-      automatic_payment_methods: {
-        enabled: true,
+      automatic_payment_methods: { enabled: true },
+      automatic_tax: { enabled: true }, // 🔑
+      receipt_email: email,
+      description: "CustoMLearning Subscription",
+      shipping: { // optional but helps fraud + tax
+        name,
+        address,
       },
     });
 
