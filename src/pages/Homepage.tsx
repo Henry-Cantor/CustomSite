@@ -91,7 +91,7 @@ const handlePostPaymentLogin = async () => {
     }
 
     if (needsPayment) {
-      let chargeAmount = 20;
+      let chargeAmount = 10;
       if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 10;
 
       setChargeAmount(chargeAmount);
@@ -238,7 +238,7 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
     setError("");
     setPaymentContext("register")
     try {
-      let chargeAmount = 20;
+      let chargeAmount = 10;
       if ((formData.userType === "teacher" || formData.userType === "student") && isWaiverValid()) {
         chargeAmount = 10;
       }
@@ -302,7 +302,7 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
     setPaymentContext("login")
 
     try {
-      setChargeAmount(20);
+      setChargeAmount(10);
       setShowPaymentModal(true);  // <-- show modal
       setPaymentSuccess(false);
 
@@ -372,7 +372,7 @@ return (
             Explore and master machine learning with interactive lessons, hands-on datasets, and highly customizable & accurate ML model templates — all without advanced coding knowledge.
             <br />
             Subscription is just{" "}
-            <span className="font-semibold text-white">$20/year</span>, or less with a promo code.
+            <span className="font-semibold text-white">$10/year (for a day or two only)</span>, or less with a promo code.
             <br />
             <br />
             <br />
@@ -389,7 +389,7 @@ return (
         <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-sm">
           <h2 className="text-lg sm:text-xl font-bold text-indigo-900">New here? Register & Pay</h2>
           <p className="text-xs sm:text-sm text-indigo-800 mt-1">
-            Create an account and get 1 year of access for just $20.<br></br>
+            Create an account and get 1 year of access for just $10.<br></br>
             PLEASE PAY ON A COMPUTER
           </p>
 
