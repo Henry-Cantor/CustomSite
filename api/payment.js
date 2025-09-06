@@ -1,6 +1,9 @@
+// /pages/api/payment.js
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2022-11-15",
+});
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,19 +11,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, amount, address, name } = req.body;
+    const { email, amount, name, address } = req.body;
 
-    // Create a PaymentIntent with automatic tax
+    if (!email || !amount || !name || !address) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Ensure amount is an integer (in cents)
+    const amountCents = Math.round(amount);
+
+    // Create PaymentIntent with automatic tax and shipping for fraud detection
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+      amount: amountCents,
       currency: "usd",
       automatic_payment_methods: { enabled: true },
-      automatic_tax: { enabled: true }, // 🔑
+      automatic_tax: { enabled: true },
       receipt_email: email,
       description: "CustoMLearning Subscription",
-      shipping: { // optional but helps fraud + tax
+      shipping: {
         name,
-        address,
+        address: {
+          line1: address.line1,
+          city: address.city,
+          state: address.state,
+          postal_code: address.postal_code,
+          country: address.country,
+        },
       },
     });
 
