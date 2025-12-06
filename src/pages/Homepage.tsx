@@ -372,7 +372,7 @@ return (
             Explore and master machine learning with interactive lessons, hands-on datasets, and highly customizable & accurate ML model templates — all without advanced coding knowledge.
             <br />
             Subscription is just{" "}
-            <span className="font-semibold text-white">$10/year (sale lasts for one week only)</span>, or less with a promo code.
+            <span className="font-semibold text-white">$10/year</span>, or less with a promo code.
             <br />
             <br />
             <br />
