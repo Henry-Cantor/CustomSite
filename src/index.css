@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Add your Tailwind or basic CSS here */
+
 body {
   font-family: system-ui, sans-serif;
   margin: 0;
