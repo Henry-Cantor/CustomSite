@@ -1,0 +1,128 @@
+{
+  "name": "customlearning",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "go": "cd frontend && npm run build && cd .. && npm run electron",
+    "electron": "electron .",
+    "package": "electron-builder"
+  },
+  "resolutions": {
+    "semver": "^7.5.4",
+    "http-proxy-agent": "5.0.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/electron": "^1.6.12",
+    "@types/papaparse": "^5.3.16",
+    "electron": "^37.2.5",
+    "electron-builder": "^26.0.12",
+    "eslint": "^8.50.0",
+    "eslint-plugin-react": "^7.32.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.876.0",
+    "dotenv": "^17.2.1",
+    "electron-is-dev": "^3.0.1",
+    "firebase": "^12.0.0",
+    "fs": "^0.0.1-security",
+    "jspdf": "^3.0.1",
+    "papaparse": "^5.5.3",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.0.0"
+  },
+  "build": {
+    "extends": null,
+    "asar": false,
+    "asarUnpack": [
+      "**/*.map",
+      "node_modules/@typescript-eslint/utils/**"
+    ],
+    "extraMetadata": {},
+    "publish": [],
+    "appId": "1:458988123017:web:4bc6435754d21eb77d6758",
+    "productName": "CustoMLearning",
+    "directories": {
+      "buildResources": "assets"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "frontend/build/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "!**/node_modules/fsevents/**",
+      "!**/*.ts",
+      "!**/*.d.ts",
+      "!**/*.map",
+      "!**/src/**/*",
+      "!**/test/**/*",
+      "!**/public/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".env",
+        "to": ".env"
+      }
+    ],
+    "win": {
+      "target": {
+        "target": "nsis", 
+        "arch": [
+          "x64"
+        ]
+      },
+      "icon": "assets/icon.ico",
+      "artifactName": "CustoMLearning-Setup.exe",
+      "executableName": "CustoMLearning",
+      "extraResources": [
+        {
+          "from": "backend/dist/",
+          "to": "backend/dist"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "CustoMLearning",
+      "createDesktopShortcut": true,
+      "compression": "store"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "signIgnore": [
+        ".*\\.wasm$",
+        "Contents/Resources/app/node_modules/.*",
+        ".*\\.map$"
+      ],
+      "identity": "Monica Cantor (JV8S34SZNT)",
+      "extraResources": [
+        {
+          "from": "backend/dist/",
+          "to": "backend/dist"
+        }
+      ]
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png",
+      "extraResources": [
+        {
+          "from": "backend/dist/",
+          "to": "backend/dist"
+        }
+      ]
+    }
+  }
+}

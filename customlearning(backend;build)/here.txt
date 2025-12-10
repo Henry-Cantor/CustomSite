@@ -1,0 +1,4 @@
+export APPLE_ID="monicacantor@hotmail.com"
+export APPLE_APP_SPECIFIC_PASSWORD="jjpq-ewnq-ldzy-ybwg"
+export APPLE_TEAM_ID="JV8S34SZNT"
+npm run package
