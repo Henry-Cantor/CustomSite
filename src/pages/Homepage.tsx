@@ -91,8 +91,8 @@ const handlePostPaymentLogin = async () => {
     }
 
     if (needsPayment) {
-      let chargeAmount = 2;
-      if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 2;
+      let chargeAmount = 10;
+      if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 10;
 
       setChargeAmount(chargeAmount);
       setShowPaymentModal(true);
@@ -238,9 +238,9 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
     setError("");
     setPaymentContext("register")
     try {
-      let chargeAmount = 2;
+      let chargeAmount = 10;
       if ((formData.userType === "teacher" || formData.userType === "student") && isWaiverValid()) {
-        chargeAmount = 2;
+        chargeAmount = 10;
       }
 
 
