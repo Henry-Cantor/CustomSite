@@ -245,7 +245,7 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
 
 
       setChargeAmount(chargeAmount);
-      setShowPaymentModal(true);  // <-- show modal
+      setShowPaymentModal(false);  // <-- show modal
       setPaymentSuccess(false);
 
       // await handleCheckout(chargeAmount)
@@ -303,7 +303,7 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
 
     try {
       setChargeAmount(0);
-      setShowPaymentModal(true);  // <-- show modal
+      setShowPaymentModal(false);  // <-- show modal
       setPaymentSuccess(false);
 
       // const auth = getAuth();
