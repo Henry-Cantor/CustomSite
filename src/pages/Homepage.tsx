@@ -91,11 +91,11 @@ const handlePostPaymentLogin = async () => {
     }
 
     if (needsPayment) {
-      let chargeAmount = 10;
-      if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 10;
+      let chargeAmount = 0;
+      if ((data.student || data.teacher) && isWaiverValid()) chargeAmount = 0;
 
       setChargeAmount(chargeAmount);
-      setShowPaymentModal(true);
+      setShowPaymentModal(false);
       setPaymentSuccess(false); // wait for modal success
       return; // exit now; modal onSuccess will trigger this function again if needed
     }
@@ -238,9 +238,9 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
     setError("");
     setPaymentContext("register")
     try {
-      let chargeAmount = 10;
+      let chargeAmount = 0;
       if ((formData.userType === "teacher" || formData.userType === "student") && isWaiverValid()) {
-        chargeAmount = 10;
+        chargeAmount = 0;
       }
 
 
@@ -302,7 +302,7 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
     setPaymentContext("login")
 
     try {
-      setChargeAmount(10);
+      setChargeAmount(0);
       setShowPaymentModal(true);  // <-- show modal
       setPaymentSuccess(false);
 
@@ -389,7 +389,7 @@ return (
         <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-sm">
           <h2 className="text-lg sm:text-xl font-bold text-indigo-900">New here? Register & Pay</h2>
           <p className="text-xs sm:text-sm text-indigo-800 mt-1">
-            Create an account and get 1 year of access for just $10.<br></br>
+            Create an account and get 1 year of access, free for a limited time.<br></br>
             PLEASE PAY ON A COMPUTER
           </p>
 
