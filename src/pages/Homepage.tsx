@@ -96,7 +96,7 @@ const handlePostPaymentLogin = async () => {
 
       setChargeAmount(chargeAmount);
       setShowPaymentModal(false);
-      setPaymentSuccess(false); // wait for modal success
+      setPaymentSuccess(true); // wait for modal success
       return; // exit now; modal onSuccess will trigger this function again if needed
     }
 
@@ -246,7 +246,7 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
 
       setChargeAmount(chargeAmount);
       setShowPaymentModal(false);  // <-- show modal
-      setPaymentSuccess(false);
+      setPaymentSuccess(true);
 
       // await handleCheckout(chargeAmount)
       //const paymentSuccess = await chargeUser(chargeAmount, {email: formData.email.trim()});
@@ -304,7 +304,7 @@ const downloadFile = async (platform: 'mac' | 'windows' | 'linux') => {
     try {
       setChargeAmount(0);
       setShowPaymentModal(false);  // <-- show modal
-      setPaymentSuccess(false);
+      setPaymentSuccess(true);
 
       // const auth = getAuth();
       // const userCredential = await signInWithEmailAndPassword(
